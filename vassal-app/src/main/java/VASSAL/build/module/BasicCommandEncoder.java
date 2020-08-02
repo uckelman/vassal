@@ -58,6 +58,8 @@ import VASSAL.counters.MenuSeparator;
 import VASSAL.counters.MovementMarkable;
 import VASSAL.counters.NonRectangular;
 import VASSAL.counters.Obscurable;
+import VASSAL.counters.Piece;
+import VASSAL.counters.PieceWrapper;
 import VASSAL.counters.Pivot;
 import VASSAL.counters.PlaceMarker;
 import VASSAL.counters.PlaySound;
@@ -203,6 +205,8 @@ public class BasicCommandEncoder implements CommandEncoder, Buildable {
    * createDecorator or createBasic
    */
   public GamePiece createPiece(String type) {
+    GamePiece p;
+
     SequenceEncoder.Decoder st = new SequenceEncoder.Decoder(type, '\t');
     type = st.nextToken();
     String innerType = st.hasMoreTokens() ? st.nextToken() : null;
@@ -214,12 +218,17 @@ public class BasicCommandEncoder implements CommandEncoder, Buildable {
         logger.warn("Could not create piece with type " + innerType);
         inner = new BasicPiece();
       }
-      Decorator d = createDecorator(type, inner);
-      return d != null ? d : inner;
+      p = createDecorator(type, inner);
+      if (p == null) {
+        p = inner;
+      }
     }
     else {
-      return createBasic(type);
+      p = createBasic(type);
     }
+
+//    return new Piece(p);
+    return new PieceWrapper(p);
   }
 
   @Override

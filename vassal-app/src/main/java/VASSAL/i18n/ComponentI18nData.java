@@ -30,6 +30,7 @@ import VASSAL.build.Configurable;
 import VASSAL.counters.BasicPiece;
 import VASSAL.counters.Decorator;
 import VASSAL.counters.GamePiece;
+import VASSAL.counters.Piece;
 import VASSAL.counters.PlaceMarker;
 
 /**
@@ -148,7 +149,15 @@ public class ComponentI18nData {
     myComponent = c;
     this.prefix = TranslatablePiece.PREFIX;
     parent = null;
-    for (GamePiece p = piece; p != null;) {
+
+    GamePiece p = piece;
+/*
+    if (p instanceof Piece) {
+      p = ((Piece) p).getInner();
+    }
+*/
+
+    while (p != null) {
       if (p instanceof TranslatablePiece) {
         PieceI18nData pieceData = ((TranslatablePiece) p).getI18nData();
         for (PieceI18nData.Property prop : pieceData.getProperties()) {
@@ -165,7 +174,14 @@ public class ComponentI18nData {
       if (p instanceof BasicPiece) {
         p = null;
       }
+/*
+      else if (p instanceof Piece) {
+// FIXME: shouldn't have to do this
+        p = ((Piece) p).getInner();
+      }
+*/
       else {
+// FIXME: bug? couldn't it be some non-Decorator?
         p = ((Decorator) p).getInner();
       }
     }

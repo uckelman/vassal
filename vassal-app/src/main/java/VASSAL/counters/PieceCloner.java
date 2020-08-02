@@ -27,7 +27,7 @@ import VASSAL.tools.ReflectionUtils;
  * Utility class for cloning {@link GamePiece}s
  */
 public class PieceCloner {
-  private static PieceCloner instance = new PieceCloner();
+  private static final PieceCloner instance = new PieceCloner();
 
   // For use by subclasses
   protected PieceCloner() {}
@@ -43,6 +43,16 @@ public class PieceCloner {
    */
   public GamePiece clonePiece(GamePiece piece) {
     GamePiece clone = null;
+
+/*
+    if (piece instanceof Piece) {
+      piece = ((Piece) piece).getInner();
+    }
+*/
+    if (piece instanceof PieceWrapper) {
+      piece = ((PieceWrapper) piece).getInner();
+    }
+
     if (piece instanceof BasicPiece) {
       clone = GameModule.getGameModule().createPiece(piece.getType());
       final Map m = piece.getMap();
@@ -81,6 +91,8 @@ public class PieceCloner {
       clone.setState(piece.getState());
       piece.setMap(m);
     }
-    return clone;
+
+//    return clone instanceof Piece ? clone : new Piece(clone);
+    return clone instanceof PieceWrapper ? clone : new PieceWrapper(clone);
   }
 }

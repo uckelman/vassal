@@ -87,6 +87,8 @@ import VASSAL.command.NullCommand;
 import VASSAL.configure.CompoundValidityChecker;
 import VASSAL.configure.MandatoryComponent;
 import VASSAL.counters.GamePiece;
+import VASSAL.counters.Piece;
+import VASSAL.counters.PieceWrapper;
 import VASSAL.i18n.ComponentI18nData;
 import VASSAL.i18n.Localization;
 import VASSAL.i18n.Resources;
@@ -508,6 +510,10 @@ public abstract class GameModule extends AbstractConfigurable implements Command
       if (commandEncoder instanceof BasicCommandEncoder) {
         GamePiece p = ((BasicCommandEncoder) commandEncoder).createPiece(type);
         if (p != null) {
+          if (!(p instanceof Piece)) {
+//            p = new Piece(p);
+            p = new PieceWrapper(p);
+          }
           return p;
         }
       }
@@ -520,6 +526,10 @@ public abstract class GameModule extends AbstractConfigurable implements Command
       if (commandEncoder instanceof BasicCommandEncoder) {
         GamePiece p = ((BasicCommandEncoder) commandEncoder).createDecorator(type, inner);
         if (p != null) {
+          if (!(p instanceof Piece)) {
+//            p = new Piece(p);
+            p = new PieceWrapper(p);
+          }
           return p;
         }
       }
