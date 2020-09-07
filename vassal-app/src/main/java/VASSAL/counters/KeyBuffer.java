@@ -121,14 +121,10 @@ public class KeyBuffer {
     }
     for (GamePiece p : targets) {
       bounds.addPiece(p);
-      p.setProperty(Properties.SNAPSHOT, ((PropertyExporter) p).getProperties()); // save state prior to command
-      
-      // Send most recent click point location
-      if (p instanceof PersistentPropertyContainer) {
-        comm = comm.append(((PersistentPropertyContainer) p).setPersistentProperty(BasicPiece.CLICKED_X, String.valueOf(clickPoint.x)))
-                   .append(((PersistentPropertyContainer) p).setPersistentProperty(BasicPiece.CLICKED_Y, String.valueOf(clickPoint.y)));
-      }
-      comm = comm.append(p.keyEvent(stroke));
+      p.setProperty(Properties.SNAPSHOT, PieceCloner.getInstance().clonePiece(p)); // save state prior to command
+      Command c2 = p.keyEvent(stroke);
+      comm = comm.append(c2);
+      bounds.addPiece(p);
     }
     bounds.repaint();
     return comm;

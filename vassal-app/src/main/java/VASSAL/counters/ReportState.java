@@ -137,23 +137,13 @@ public class ReportState extends Decorator implements TranslatablePiece {
 
     Command c = null;
 
-    java.util.Map<String, Object> oldPiece;
-    final Object o = getProperty(Properties.SNAPSHOT);
-    // If the SNAPSHOT is returned as a PropertyExporter instead of a Map, then it been set from custom code
-    // that is still calling using PieceCloner.clonePiece. Extract the Property Map from the supplied GamePiece and annoy the user.
-    if (o instanceof PropertyExporter) {
-      oldPiece = ((PropertyExporter) o).getProperties();
-      ProblemDialog.showOutdatedUsage("Custom trait calling setProperty(Properties.SNAPSHOT, PieceCloner.getInstance().clonePiece(p))");
-    }
-    else {
-      oldPiece = (java.util.Map<String, Object>) o;
-    }
+    GamePiece oldPiece = (GamePiece) getProperty(Properties.SNAPSHOT);
 
-    boolean wasVisible = oldPiece != null && !Boolean.TRUE.equals(oldPiece.get(Properties.INVISIBLE_TO_OTHERS));
+    boolean wasVisible = oldPiece != null && !Boolean.TRUE.equals(oldPiece.getProperty(Properties.INVISIBLE_TO_OTHERS));
     boolean isVisible = !Boolean.TRUE.equals(outer.getProperty(Properties.INVISIBLE_TO_OTHERS));
 
     PieceAccess.GlobalAccess.hideAll();
-    String oldUnitName = oldPiece == null ? null : (String) oldPiece.get(PropertyExporter.LOCALIZED_NAME);
+    String oldUnitName = oldPiece == null ? null : oldPiece.getLocalizedName();
     format.setProperty(OLD_UNIT_NAME, oldUnitName);
     String newUnitName = outer.getLocalizedName();
     format.setProperty(NEW_UNIT_NAME, newUnitName);
@@ -419,9 +409,9 @@ public class ReportState extends Decorator implements TranslatablePiece {
    *
    */
   private static class OldAndNewPieceProperties implements PropertySource {
-    private final java.util.Map<String, Object> oldPiece;
-    private final GamePiece newPiece;
-    public OldAndNewPieceProperties(java.util.Map<String, Object> oldPiece, GamePiece newPiece) {
+    private GamePiece oldPiece;
+    private GamePiece newPiece;
+    public OldAndNewPieceProperties(GamePiece oldPiece, GamePiece newPiece) {
       super();
       this.oldPiece = oldPiece;
       this.newPiece = newPiece;
@@ -433,7 +423,7 @@ public class ReportState extends Decorator implements TranslatablePiece {
         String name = key.toString();
         if (name.startsWith("old") && name.length() >= 4) {
           name = name.substring(3);
-          value = oldPiece.get(name);
+          value = oldPiece.getProperty(name);
         }
         else {
           value = newPiece.getProperty(key);
