@@ -26,15 +26,14 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1443,12 +1442,7 @@ public class Deck extends Stack implements PlayerRoster.SideChangeListener {
   }
 
   public Command loadDeck(File f) throws IOException {
-    String ds;
-
-    try (Reader fr = new FileReader(f, StandardCharsets.UTF_8);
-         BufferedReader in = new BufferedReader(fr)) {
-      ds = IOUtils.toString(in);
-    }
+    final String ds = Files.readString(f.toPath(), StandardCharsets.UTF_8);
 
     gameModule.addCommandEncoder(commandEncoder);
     Command c = gameModule.decode(ds);

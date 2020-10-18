@@ -3,17 +3,16 @@ package VASSAL.tools.version;
 import static java.lang.Integer.signum;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+
+import org.apache.commons.io.IOUtils;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import VASSAL.Info;
-import VASSAL.tools.io.IOUtils;
-
 
 public class VersionUtils {
   protected VersionUtils() {}
@@ -39,9 +38,7 @@ public class VersionUtils {
   }
 
   private static String getVersion(String url) throws IOException {
-    try (InputStream in = new URL(url).openStream()) {
-      return IOUtils.toString(in, StandardCharsets.UTF_8).trim();
-    }
+    return IOUtils.toString(new URL(url), StandardCharsets.UTF_8).trim();
   }
 
   public static boolean isCurrent(String version) throws IOException {
