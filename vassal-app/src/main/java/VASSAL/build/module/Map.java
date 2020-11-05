@@ -38,7 +38,6 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
-import java.awt.event.ActionListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 import java.awt.event.KeyEvent;
@@ -177,6 +176,7 @@ import VASSAL.tools.ToolBarComponent;
 import VASSAL.tools.UniqueIdManager;
 import VASSAL.tools.WrapLayout;
 import VASSAL.tools.menu.MenuManager;
+import VASSAL.tools.swing.SplitPane;
 import VASSAL.tools.swing.SwingUtils;
 
 /**
@@ -210,7 +210,12 @@ public class Map extends AbstractToolbarItem implements GameComponent, MouseList
   protected ArrayList<Drawable> drawComponents = new ArrayList<>(); //NOPMD
   protected JLayeredPane layeredPane = new JLayeredPane();
   protected JScrollPane scroll;
+
+  @Deprecated(since = "2020-11-05", forRemoval = true)
   protected ComponentSplitter.SplitPane mainWindowDock;
+
+  protected SplitPane splitPane;
+
   protected BoardPicker picker;
   protected JToolBar toolBar = new JToolBar();
   protected Zoomer zoom;
@@ -537,13 +542,21 @@ public class Map extends AbstractToolbarItem implements GameComponent, MouseList
    */
   @Override
   public void build(Element e) {
-    final ActionListener al = e1 -> {
-      if (mainWindowDock == null && getLaunchButton().isEnabled() && theMap.getTopLevelAncestor() != null) {
-        theMap.getTopLevelAncestor().setVisible(!theMap.getTopLevelAncestor().isVisible());
-      }
-    };
     setButtonTextKey(BUTTON_NAME); // Uses non-standard "button text" key
-    launchButton = makeLaunchButton("", Resources.getString("Editor.Map.map"), "/images/map.gif", al); //NON-NLS
+
+    launchButton = makeLaunchButton(
+      "", //NON-NLS
+      Resources.getString("Editor.Map.map"), //NON-NLS
+      "/images/map.gif", //NON-NLS
+      evt -> {
+        if (splitPane == null && getLaunchButton().isEnabled()) {
+          final Container tla = theMap.getTopLevelAncestor();
+          if (tla != null) {
+            tla.setVisible(!tla.isVisible());
+          }
+        }
+      }
+    );
     getLaunchButton().setEnabled(false);
     getLaunchButton().setVisible(false);
 
@@ -759,16 +772,15 @@ public class Map extends AbstractToolbarItem implements GameComponent, MouseList
         new IntConfigurer(MAIN_WINDOW_HEIGHT, null, -1);
       Prefs.getGlobalPrefs().addOption(null, config);
 
-      mainWindowDock = ComponentSplitter.split(
-        ComponentSplitter.splitAncestorOf(g.getControlPanel(), -1),
-        layeredPane,
-        ComponentSplitter.SplitPane.HIDE_BOTTOM,
-        true
-      );
-      mainWindowDock.setResizeWeight(0.0);
+      final Component controlPanel = GameModule.getGameModule().getControlPanel();
+      final Container cppar = controlPanel.getParent();
+      final int i = SwingUtils.getIndexInParent(controlPanel, cppar);
 
-      g.addKeyStrokeSource(
-        new KeyStrokeSource(theMap, JComponent.WHEN_FOCUSED));
+      splitPane = new SplitPane(SplitPane.VERTICAL_SPLIT, controlPanel, layeredPane);
+      splitPane.setResizeWeight(0.0);
+      cppar.add(splitPane, i);
+
+      g.addKeyStrokeSource(new KeyStrokeSource(theMap, JComponent.WHEN_FOCUSED));
     }
     else {
       g.addKeyStrokeSource(
@@ -2540,15 +2552,17 @@ public class Map extends AbstractToolbarItem implements GameComponent, MouseList
       final GameModule g = GameModule.getGameModule();
 
       if (shouldDockIntoMainWindow()) {
-        if (mainWindowDock != null) { // This is protected from null elsewhere, and crashed null here, so I'm thinking protect here too.
-          mainWindowDock.showComponent();
+        if (splitPane != null) {
           final int height = (Integer)
             Prefs.getGlobalPrefs().getValue(MAIN_WINDOW_HEIGHT);
           if (height > 0) {
-            final Container top = mainWindowDock.getTopLevelAncestor();
-            top.setSize(top.getWidth(), height);
+            final Container tla = splitPane.getTopLevelAncestor();
+            tla.setSize(tla.getWidth(), height);
           }
+
+          splitPane.showBottom();
         }
+
         if (toolBar.getParent() == null) {
           g.getToolBar().addSeparator();
           g.getToolBar().add(toolBar);
@@ -2583,12 +2597,13 @@ public class Map extends AbstractToolbarItem implements GameComponent, MouseList
     else {
       pieces.clear();
       boards.clear();
-      if (mainWindowDock != null) {
-        if (mainWindowDock.getHideableComponent().isShowing()) {
+
+      if (splitPane != null) {
+        if (splitPane.isBottomVisible()) {
           Prefs.getGlobalPrefs().getOption(MAIN_WINDOW_HEIGHT)
-               .setValue(mainWindowDock.getTopLevelAncestor().getHeight());
+               .setValue(splitPane.getTopLevelAncestor().getHeight());
+          splitPane.hideBottom();
         }
-        mainWindowDock.hideComponent();
         toolBar.setVisible(false);
       }
       else if (theMap.getTopLevelAncestor() != null) {
@@ -2627,7 +2642,7 @@ public class Map extends AbstractToolbarItem implements GameComponent, MouseList
    * Updates the title bar of the current window
    */
   public void updateTitleBar() {
-    if (mainWindowDock != null) {
+    if (splitPane != null) {
       return;
     }
 
