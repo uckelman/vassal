@@ -1061,26 +1061,27 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
   private static class TraitClipboard {
     private final String type;
     private final String state;
+
     public TraitClipboard(Decorator copy) {
       type = copy.myGetType();
       state = copy.myGetState();
     }
+
     public String getType() {
       return type;
     }
+
     public String getState() {
       return state;
     }
   }
 
   static class ListTransferHandler extends TransferHandler {
-
     private static final long serialVersionUID = 1;
 
     private final PieceDefiner definer;
     private int fromIndex;
     private String fromList;
-
 
     public ListTransferHandler(PieceDefiner definer) {
       super();
@@ -1163,12 +1164,12 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
       setDragImage(img);
       setDragImageOffset(new Point(0, h));
     }
+
     /**
      * Move Only
      */
     @Override
     public int getSourceActions(JComponent c) {
-
       // Dragging fails if nothing selected in source, should never happen
       if (getFromIndex() < 0) {
         return TransferHandler.NONE;
