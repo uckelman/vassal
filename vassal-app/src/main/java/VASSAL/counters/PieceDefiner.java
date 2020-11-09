@@ -403,14 +403,14 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
   private void initComponents() {
     // Set a maximum size on this panel to prevent the window opening too tall on smaller screens
     final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    maxPanelHeight = (int) screenSize.getHeight() - 150;
-    setMaximumSize(new Dimension((int) screenSize.getWidth() - 100, maxPanelHeight));
+    maxPanelHeight = screenSize.height - 150;
+    setMaximumSize(new Dimension(screenSize.width - 100, maxPanelHeight));
 
     // Main Layout for entire dialog. Just let it fill to max size
-    setLayout(new MigLayout("ins 0", "[grow,fill]")); // NON-NLS
+    setLayout(new MigLayout("ins 0,fill")); // NON-NLS
 
     // A Panel to hold the trait lists
-    controls = new JPanel(new MigLayout("ins 0", "[fill,grow 1,:200:]rel[]rel[fill,grow 4,:400:]rel[]", "[grow,center][][]")); // NON-NLS
+    controls = new JPanel(new MigLayout("ins 0,fill", "[grow 1,:200:]rel[]rel[grow 4,:400:]rel[]", "[grow][][]")); // NON-NLS
 
     // A Panel to hold the generated PieceSlot image
     slotPanel = new JPanel(new MigLayout("ins 0", "push[]push", "push[]2[]push")); // NON-NLS
@@ -441,7 +441,7 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
       });
     }
 
-    add(splitPane, "grow,wrap"); // NON-NLS
+    add(splitPane, "grow,push,wrap"); // NON-NLS
 
     // Custom TransferHandler to mediate drag and drop
     final ListTransferHandler transferHandler = new ListTransferHandler(this);
@@ -493,13 +493,13 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
     addButton.setMargin(buttonInsets);
     addButton.setToolTipText(Resources.getString("Editor.PieceDefiner.add_tip"));
     addButton.addActionListener(evt -> doAdd());
-    addRemovePanel.add(addButton, "grow"); // NON-NLS
+    addRemovePanel.add(addButton, "sg"); // NON-NLS
 
     removeButton = new JButton(Resources.getString("Editor.PieceDefiner.remove"), IconFactory.getIcon("go-previous", IconFamily.SMALL)); // NON-NLS
     removeButton.setMargin(buttonInsets);
     removeButton.setToolTipText(Resources.getString("Editor.PieceDefiner.remove_tip"));
     removeButton.addActionListener(evt -> doRemove());
-    addRemovePanel.add(removeButton, "grow"); // NON-NLS
+    addRemovePanel.add(removeButton, "sg"); // NON-NLS
     addRemovePanel.add(pieceIdLabel, "center"); // NON-NLS
 
     // The list of traits in use in this GamePiece
@@ -567,7 +567,7 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
     inUseButtonPanel.add(propsButton);
 
     // A panel to hold the trait navigation buttons.
-    final JPanel moveUpDownPanel = new JPanel(new MigLayout("ins 0,wrap 1", "[grow]")); // NON-NLS
+    final JPanel moveUpDownPanel = new JPanel(new MigLayout("ins 0,wrap 1")); // NON-NLS
 
     moveTopButton = new JButton(Resources.getString("Editor.PieceDefiner.move_top"), IconFactory.getIcon("go-top", IconFamily.SMALL)); // NON-NLS
     moveTopButton.setToolTipText(Resources.getString("Editor.PieceDefiner.top_tip"));
@@ -579,7 +579,7 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
         moveDecoratorTop(index);
       }
     });
-    moveUpDownPanel.add(moveTopButton, "grow"); // NON-NLS
+    moveUpDownPanel.add(moveTopButton, "sg"); // NON-NLS
 
     moveUpButton = new JButton(Resources.getString("Editor.PieceDefiner.move_up"), IconFactory.getIcon("go-up", IconFamily.SMALL)); // NON-NLS
     moveUpButton.setToolTipText(Resources.getString("Editor.PieceDefiner.up_tip"));
@@ -591,7 +591,7 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
         moveDecoratorUp(index);
       }
     });
-    moveUpDownPanel.add(moveUpButton, "grow"); // NON-NLS
+    moveUpDownPanel.add(moveUpButton, "sg"); // NON-NLS
 
     moveDownButton = new JButton(Resources.getString("Editor.PieceDefiner.move_down"), IconFactory.getIcon("go-down", IconFamily.SMALL)); // NON-NLS
     moveDownButton.setToolTipText(Resources.getString("Editor.PieceDefiner.down_tip"));
@@ -603,7 +603,7 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
         moveDecoratorDown(index);
       }
     });
-    moveUpDownPanel.add(moveDownButton, "grow"); // NON-NLS
+    moveUpDownPanel.add(moveDownButton, "sg"); // NON-NLS
 
     moveBottomButton = new JButton(Resources.getString("Editor.PieceDefiner.move_bottom"), IconFactory.getIcon("go-bottom", IconFamily.SMALL)); // NON-NLS
     moveBottomButton.setToolTipText(Resources.getString("Editor.PieceDefiner.bottom_trait"));
@@ -615,7 +615,7 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
         moveDecoratorBottom(index);
       }
     });
-    moveUpDownPanel.add(moveBottomButton, "grow"); // NON-NLS
+    moveUpDownPanel.add(moveBottomButton, "sg"); // NON-NLS
 
     // A panel to hold the notes at the bottom of the screen
     final JPanel notePanel = new JPanel(new MigLayout("ins 0,wrap 1,gapy 0", "push[center]push")); // NON-NLS
