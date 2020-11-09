@@ -695,7 +695,6 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
     }
   }
 
-
   private void doPaste() {
     if (clipBoard != null) {
       paste();
@@ -712,13 +711,11 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
     }
   }
 
-
   private void doAdd() {
     doAdd(availableList.getSelectedIndex(), inUseList.getSelectedIndex() < 0 ? inUseList.getModel().getSize() : inUseList.getSelectedIndex());
   }
 
   private void doAdd(int sourceIndex, int insertIndex) {
-
     final Object selected = availableModel.getElementAt(sourceIndex);
     if (selected instanceof Decorator) {
       if (inUseModel.getSize() > 0) {
@@ -756,7 +753,6 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
       }
     }
   }
-
 
   /**
    * Change Sort order by swapping models over
@@ -810,7 +806,6 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
    * @param toIndex New Position
    */
   protected void moveDecorator(int fromIndex, int toIndex) {
-
     // Can't move anything above BasicPiece
     if (inUseModel.size() > 0) {
       if (inUseModel.getElementAt(0) instanceof BasicPiece && toIndex == 0) {
@@ -850,7 +845,6 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
    * @return Removed Decorator
    */
   protected GamePiece removeDecorator(int index) {
-
     // Find the existing inner and outer of the piece to be removed
     final GamePiece inner = inUseModel.elementAt(index - 1);
     final Decorator outer = index < inUseModel.size() - 1 ?  (Decorator) inUseModel.elementAt(index + 1) : null;
@@ -874,7 +868,6 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
    * @param piece Decorator to insert
    */
   protected void insertDecorator(int index, GamePiece piece) {
-
     // Find the pieces that will be the new inner and outer for our piece
     final GamePiece inner = inUseModel.elementAt(index - 1);
     final Decorator outer = index < inUseModel.size() ? (Decorator) inUseModel.elementAt(index) : null;
@@ -887,7 +880,6 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
     if (outer != null) {
       outer.setInner(piece);
     }
-
   }
 
   protected void importPiece(String className) {
