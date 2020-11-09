@@ -618,13 +618,10 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
     moveUpDownPanel.add(moveBottomButton, "sg"); // NON-NLS
 
     // A panel to hold the notes at the bottom of the screen
-    final JPanel notePanel = new JPanel(new MigLayout("ins 0,wrap 1,gapy 0", "push[center]push")); // NON-NLS
-    final JLabel note1 = new JLabel(Resources.getString("Editor.PieceDefiner.note1"));
-    final Font standardFont = note1.getFont();
+    final JLabel noteLabel = new JLabel(Resources.getString("Editor.PieceDefiner.note1"));
+    final Font standardFont = noteLabel.getFont();
     final Font italicFont = new Font(standardFont.getFontName(), Font.ITALIC, standardFont.getSize());
-    note1.setFont(italicFont);
-
-    notePanel.add(note1, "center"); // NON-NLS
+    noteLabel.setFont(italicFont);
 
     controls.add(availableScroll, "grow,push"); // NON-NLS
     controls.add(addRemovePanel, "aligny center"); // NON-NLS
@@ -634,7 +631,7 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
     controls.add(availableButtonPanel, "center"); // NON-NLS
     controls.add(inUseButtonPanel, "skip 1,center,wrap"); // NON-NLS
 
-    controls.add(notePanel, "span 3,growx,wrap"); // NON-NLS
+    controls.add(noteLabel, "span 3,center,wrap"); // NON-NLS
 
     // Update the Sort Order
     updateSortOrder();
