@@ -35,7 +35,6 @@ import VASSAL.tools.icon.IconFactory;
 import VASSAL.tools.icon.IconFamily;
 import VASSAL.tools.swing.SwingUtils;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dialog;
@@ -235,7 +234,6 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
     for (final GamePiece piece : alphaMap.values()) {
       alphaModel.addElement(piece);
     }
-
   }
 
   /**
@@ -302,9 +300,9 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
   }
 
   @Override
-  @Deprecated(since = "20200912", forRemoval = true)
+  @Deprecated(since = "2020-09-12", forRemoval = true)
   public void setBaseWindow(HelpWindow w) {
-    ProblemDialog.showDeprecated("20200912");
+    ProblemDialog.showDeprecated("2020-09-12");
   }
 
   /**
@@ -417,9 +415,7 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
     // A Panel to hold the generated PieceSlot image
     slotPanel = new JPanel(new MigLayout("ins 0", "push[]push", "push[]2[]push")); // NON-NLS
     slotPanel.setMinimumSize(new Dimension(MINIMUM_SPLIT_SIZE, MINIMUM_SPLIT_SIZE));
-    final JPanel sPanel = new JPanel(new MigLayout("ins 0", "[grow,fill]", "[grow,fill]")); // NON-NLS
-    sPanel.add(slot.getComponent(), "grow"); // NON-NLS
-    slotPanel.add(sPanel, "grow,wrap"); // NON-NLS
+    slotPanel.add(slot.getComponent(), "grow,wrap"); // NON-NLS
     scaleLabel = new JLabel();
     slotPanel.add(scaleLabel, "center,aligny top"); // NON-NLS
 
@@ -451,7 +447,6 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
     final ListTransferHandler transferHandler = new ListTransferHandler(this);
 
     // The list of available Traits
-    final JPanel availablePanel = new JPanel(new MigLayout("ins 0", "[fill,grow]")); // NON-NLS
     availableList = new JList<>();
     availableList.setName(AVAILABLE);
     availableList.setDragEnabled(true);
@@ -466,12 +461,9 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
       addButton.setEnabled(o instanceof Decorator);
     });
 
-    final JPanel availableListPanel = new JPanel(new MigLayout("ins 0", "[grow,fill]", "grow,fill")); // NON-NLS
-    availableListPanel.add(availableList, "grow"); // NON-NLS
-    final JScrollPane availableScroll = new JScrollPane(availableListPanel);
+    final JScrollPane availableScroll = new JScrollPane(availableList);
 
     availableScroll.setBorder(BorderFactory.createTitledBorder(Resources.getString("Editor.PieceDefiner.available_traits")));
-    availablePanel.add(availableScroll, "grow,push"); // NON-NLS
 
     // A Panel to hold the Help and Import button below the Available Traits
     final JPanel availableButtonPanel = new JPanel(new MigLayout("ins 0", "push[]rel[]rel[]push")); // NON-NLS
@@ -491,7 +483,6 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
 
     availableButtonPanel.add(importButton);
     availableButtonPanel.add(helpButton);
-    controls.add(availablePanel, "grow"); // NON-NLS
 
     // A Panel holding the add and Remove buttons between the two trait lists
     final JPanel addRemovePanel = new JPanel();
@@ -511,10 +502,7 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
     addRemovePanel.add(removeButton, "grow"); // NON-NLS
     addRemovePanel.add(pieceIdLabel, "center"); // NON-NLS
 
-    controls.add(addRemovePanel, "aligny center"); // NON-NLS
-
     // The list of traits in use in this GamePiece
-    final JPanel inUsePanel = new JPanel(new MigLayout("ins 0,wrap 1", "[fill,grow]", "[fill,grow]")); // NON-NLS
     inUseList = new JList<>();
     inUseList.setName(INUSE);
     inUseList.addKeyListener(new InUseListKeyAdapter(this));
@@ -554,11 +542,8 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
         }
       }
     });
-    final JPanel inUseListPanel = new JPanel(new BorderLayout());
-    inUseListPanel.add(inUseList, BorderLayout.CENTER);
-    final JScrollPane inUseScroll = new JScrollPane(inUseListPanel);
+    final JScrollPane inUseScroll = new JScrollPane(inUseList);
     inUseScroll.setBorder(BorderFactory.createTitledBorder(Resources.getString("Editor.PieceDefiner.current_traits")));
-    inUsePanel.add(inUseScroll, "grow"); // NON-NLS
 
     // A panel holding the cut/paste/propertiues buttons below the In Use traits
     final JPanel inUseButtonPanel = new JPanel(new MigLayout("ins 0", "push[]rel[]rel[]push")); // NON-NLS
@@ -580,8 +565,6 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
     });
 
     inUseButtonPanel.add(propsButton);
-
-    controls.add(inUsePanel, "grow"); // NON-NLS
 
     // A panel to hold the trait navigation buttons.
     final JPanel moveUpDownPanel = new JPanel(new MigLayout("ins 0,wrap 1", "[grow]")); // NON-NLS
@@ -634,12 +617,6 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
     });
     moveUpDownPanel.add(moveBottomButton, "grow"); // NON-NLS
 
-    controls.add(moveUpDownPanel, "wrap"); // NON-NLS
-
-    controls.add(availableButtonPanel, "center"); // NON-NLS
-    controls.add(new JLabel(""));
-    controls.add(inUseButtonPanel, "center,wrap"); // NON-NLS
-
     // A panel to hold the notes at the bottom of the screen
     final JPanel notePanel = new JPanel(new MigLayout("ins 0,wrap 1,gapy 0", "push[center]push")); // NON-NLS
     final JLabel note1 = new JLabel(Resources.getString("Editor.PieceDefiner.note1"));
@@ -648,11 +625,19 @@ public class PieceDefiner extends JPanel implements HelpWindowExtension {
     note1.setFont(italicFont);
 
     notePanel.add(note1, "center"); // NON-NLS
+
+    controls.add(availableScroll, "grow,push"); // NON-NLS
+    controls.add(addRemovePanel, "aligny center"); // NON-NLS
+    controls.add(inUseScroll, "grow,push"); // NON-NLS
+    controls.add(moveUpDownPanel, "wrap"); // NON-NLS
+
+    controls.add(availableButtonPanel, "center"); // NON-NLS
+    controls.add(inUseButtonPanel, "skip 1,center,wrap"); // NON-NLS
+
     controls.add(notePanel, "span 3,growx,wrap"); // NON-NLS
 
     // Update the Sort Order
     updateSortOrder();
-
   }
 
   /**
