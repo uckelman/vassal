@@ -125,7 +125,6 @@ import VASSAL.i18n.Language;
 import VASSAL.i18n.Localization;
 import VASSAL.i18n.Resources;
 import VASSAL.launch.PlayerWindow;
-import VASSAL.preferences.GlobalPrefs;
 import VASSAL.preferences.PositionOption;
 import VASSAL.preferences.Prefs;
 import VASSAL.tools.ArchiveWriter;
@@ -150,8 +149,8 @@ import VASSAL.tools.swing.SwingUtils;
 import VASSAL.tools.version.VersionUtils;
 
 import static VASSAL.preferences.Prefs.MAIN_WINDOW_HEIGHT;
-import static VASSAL.preferences.Prefs.MAIN_WINDOW_WIDTH;
 import static VASSAL.preferences.Prefs.MAIN_WINDOW_REMEMBER;
+import static VASSAL.preferences.Prefs.MAIN_WINDOW_WIDTH;
 
 /**
  * The GameModule class is the base class for a VASSAL module.  It is
@@ -1448,16 +1447,6 @@ public class GameModule extends AbstractConfigurable
     }
 
     if (!cancelled) {
-      // write window size prefs
-      final GlobalPrefs gp = (GlobalPrefs) Prefs.getGlobalPrefs();
-      if (Boolean.TRUE.equals(gp.getOption(MAIN_WINDOW_REMEMBER).getValue())) {
-        gp.setDisableAutoWrite(true);
-        gp.getOption(MAIN_WINDOW_HEIGHT).setValue(frame.getHeight());
-        gp.getOption(MAIN_WINDOW_WIDTH).setValue(frame.getWidth());
-        gp.saveGlobal();
-        gp.setDisableAutoWrite(false);
-      }
-
       Prefs p = null;
 
       // write and close module prefs

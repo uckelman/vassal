@@ -163,6 +163,7 @@ import VASSAL.counters.ReportState;
 import VASSAL.counters.Stack;
 import VASSAL.i18n.Resources;
 import VASSAL.i18n.TranslatableConfigurerFactory;
+import VASSAL.preferences.GlobalPrefs;
 import VASSAL.preferences.PositionOption;
 import VASSAL.preferences.Prefs;
 import VASSAL.search.HTMLImageFinder;
@@ -181,6 +182,7 @@ import VASSAL.tools.swing.SwingUtils;
 
 import static VASSAL.preferences.Prefs.MAIN_WINDOW_HEIGHT;
 import static VASSAL.preferences.Prefs.MAIN_WINDOW_REMEMBER;
+import static VASSAL.preferences.Prefs.MAIN_WINDOW_WIDTH;
 
 /**
  * The Map is the main component for displaying and containing {@link GamePiece}s during play. Pieces are displayed on
@@ -2613,17 +2615,20 @@ public class Map extends AbstractToolbarItem implements GameComponent, MouseList
         if (splitPane != null) {
           splitPane.hideBottom();
 
+          final GlobalPrefs p = (GlobalPrefs) Prefs.getGlobalPrefs();
           final Dimension d = g.getPlayerWindow().getSize();
-          final Prefs p = Prefs.getGlobalPrefs();
+
           if (Boolean.TRUE.equals(p.getOption(MAIN_WINDOW_REMEMBER).getValue())) {
-            final int h = (Integer) p.getOption(MAIN_WINDOW_HEIGHT).getValue();
-            if (h > 0) {
-              g.getPlayerWindow().setSize(d.width, h / 3);
-            }
+            // write window size prefs
+            p.setDisableAutoWrite(true);
+            p.getOption(MAIN_WINDOW_HEIGHT).setValue(d.height);
+            p.getOption(MAIN_WINDOW_WIDTH).setValue(d.width);
+            p.saveGlobal();
+            p.setDisableAutoWrite(false);
           }
-          else {
-            g.getPlayerWindow().setSize(d.width, d.height / 3);
-          }
+
+          // reduce window height to a third
+          g.getPlayerWindow().setSize(d.width, d.height / 3);
         }
         toolBar.setVisible(false);
       }
