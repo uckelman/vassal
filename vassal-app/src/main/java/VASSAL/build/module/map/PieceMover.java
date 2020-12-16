@@ -1078,15 +1078,21 @@ public class PieceMover extends AbstractBuildable
                                List<Point> relativePositions, double zoom) {
       final Graphics2D g = image.createGraphics();
 
+      final DragBuffer dbuf = DragBuffer.getBuffer();
       int index = 0;
       Point lastPos = null;
       int stackCount = 0;
-      for (PieceIterator dragContents = DragBuffer.getBuffer().getIterator();
-           dragContents.hasMoreElements(); ) {
-
-        final GamePiece piece = dragContents.nextPiece();
+      for (PieceIterator i = dbuf.getIterator(); i.hasMoreElements(); ) {
+        GamePiece piece = i.nextPiece();
         final Point pos = relativePositions.get(index++);
         final Map map = piece.getMap();        
+
+        // Check if we have the entire stack for dragging; if so, draw that
+        // instead, to ensure that we get the exact offsets drawn normally.
+        final Stack s = piece.getParent();
+        if (s != null && dbuf.containsAllMembers(s)) {
+          piece = s;
+        }
 
         if (piece instanceof Stack) {
           stackCount = 0;
