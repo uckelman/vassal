@@ -1023,9 +1023,10 @@ public class PieceMover extends AbstractBuildable
 
     private List<Point> buildBoundingBox(double zoom, boolean doOffset) {
       final ArrayList<Point> relativePositions = new ArrayList<>();
-      final PieceIterator dragContents = DragBuffer.getBuffer().getIterator();
-      final GamePiece firstPiece = dragContents.nextPiece();
-      GamePiece lastPiece = firstPiece;
+      final DragBuffer dbuf = DragBuffer.getBuffer();
+      final PieceIterator i = dbuf.getIterator();
+      final GamePiece firstPiece = i.nextPiece();
+      GamePiece prevPiece = firstPiece;
 
       currentPieceOffsetX =
         (int) (originalPieceOffsetX / dragPieceOffCenterZoom * zoom + 0.5);
@@ -1043,8 +1044,17 @@ public class PieceMover extends AbstractBuildable
 
       relativePositions.add(new Point(0, 0));
       int stackCount = 0;
-      while (dragContents.hasMoreElements()) {
-        final GamePiece nextPiece = dragContents.nextPiece();
+      while (i.hasMoreElements()) {
+        GamePiece nextPiece = i.nextPiece();
+
+        // Check if we have the entire stack for dragging; if so, use the
+        // boudning box it computes, to ensure that we get the exact offsets
+        // it normally has.
+        final Stack s = nextPiece.getParent();
+        if (s != null && dbuf.containsAllMembers(s)) {
+          nextPiece = s;
+        }
+
         final Rectangle r = nextPiece.getShape().getBounds();
         r.width *= zoom;
         r.height *= zoom;
@@ -1058,7 +1068,7 @@ public class PieceMover extends AbstractBuildable
             zoom * (nextPiece.getPosition().y - firstPiece.getPosition().y)));
         r.translate(p.x, p.y);
 
-        if (nextPiece.getPosition().equals(lastPiece.getPosition())) {
+        if (nextPiece.getPosition().equals(prevPiece.getPosition())) {
           stackCount++;
           final StackMetrics sm = getStackMetrics(nextPiece);
           r.translate(
@@ -1069,7 +1079,7 @@ public class PieceMover extends AbstractBuildable
 
         boundingBox.add(r);
         relativePositions.add(p);
-        lastPiece = nextPiece;
+        prevPiece = nextPiece;
       }
       return relativePositions;
     }
