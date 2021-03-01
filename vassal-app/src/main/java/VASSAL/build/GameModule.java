@@ -487,7 +487,9 @@ public class GameModule extends AbstractConfigurable
       build(null);
     }
     else {
+/*
       final AbstractMetaData data = MetaDataFactory.buildMetaData(f);
+      
 
       if (!(data instanceof ModuleMetaData)) {
         throw new IOException(
@@ -496,6 +498,8 @@ public class GameModule extends AbstractConfigurable
       }
 
       final String properBuildFileName = (VersionUtils.compareVersions(VersionUtils.truncateToMinorVersion(data.getVassalVersion()), "3.5") < 0) ? BUILDFILE_OLD : BUILDFILE;
+*/
+      final String properBuildFileName = BUILDFILE;
 
       // existing module
       try (InputStream inner = darch.getInputStream(properBuildFileName);

@@ -21,13 +21,15 @@ package VASSAL.launch;
 import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import javax.swing.JFrame;
 
 import VASSAL.build.GameModule;
 import VASSAL.i18n.Resources;
 import VASSAL.tools.ArchiveWriter;
-import VASSAL.tools.io.ZipArchive;
+import VASSAL.tools.io.DirArchive;
+//import VASSAL.tools.io.ZipArchive;
 import VASSAL.tools.swing.SwingUtils;
 
 public class EditModuleAction extends LoadModuleAction {
@@ -45,7 +47,9 @@ public class EditModuleAction extends LoadModuleAction {
 
   @Override
   protected void loadModule(File f) throws IOException {
-    GameModule.init(new GameModule(new ArchiveWriter(new ZipArchive(f), ".vmod"))); //NON-NLS
+//    GameModule.init(new GameModule(new ArchiveWriter(new ZipArchive(f), ".vmod"))); //NON-NLS
+//    GameModule.init(new GameModule(new ArchiveWriter(new DirArchive(f.toPath().getParent()), ".vmod"))); //NON-NLS
+    GameModule.init(new GameModule(new ArchiveWriter(new DirArchive(Path.of("/home/uckelman/projects/VASSAL/trunk/tmp")), ".vmod"))); //NON-NLS
 
 // FIXME: really hide the MM?
 //    ModuleManagerWindow.getInstance().setVisible(false);
