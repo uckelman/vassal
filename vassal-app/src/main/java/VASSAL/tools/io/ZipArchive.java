@@ -18,7 +18,6 @@ package VASSAL.tools.io;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilterInputStream;
@@ -54,7 +53,7 @@ import VASSAL.tools.concurrent.CountingReadWriteLock;
  * @author Joel Uckelman
  * @since 3.2.0
  */
-public class ZipArchive implements FileArchive {
+public class ZipArchive extends FileArchiveBase {
   private final Path archive;
   private ZipFile zipFile;
 
@@ -304,34 +303,6 @@ public class ZipArchive implements FileArchive {
     catch (IOException ex) {
       w.unlock();
       throw ex;
-    }
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void add(String path, String extPath) throws IOException {
-    add(path, new File(extPath));
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void add(String path, File extPath) throws IOException {
-    try (InputStream in = Files.newInputStream(extPath.toPath())) {
-      add(path, in);
-    }
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void add(String path, byte[] bytes) throws IOException {
-    add(path, new ByteArrayInputStream(bytes));
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void add(String path, InputStream in) throws IOException {
-    try (OutputStream out = getOutputStream(path)) {
-      in.transferTo(out);
     }
   }
 
