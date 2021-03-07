@@ -385,7 +385,8 @@ public class BasicLogger implements Logger, Buildable, GameComponent, CommandEnc
 // FIXME: Extremely inefficient! Make encode write to an OutputStream
       final String logString = GameModule.getGameModule().encode(log);
 
-      try (ZipWriter zw = new ZipWriter(outputFile)) {
+//      try (ZipWriter zw = new ZipWriter(outputFile)) {
+      try (ZipWriter zw = ZipWriter.lockedZipWriter(outputFile)) {
         try (OutputStream out = new ObfuscatingOutputStream(new BufferedOutputStream(zw.write(GameState.SAVEFILE_ZIP_ENTRY)))) {
           out.write(logString.getBytes(StandardCharsets.UTF_8));
         }

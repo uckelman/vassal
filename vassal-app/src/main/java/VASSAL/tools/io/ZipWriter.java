@@ -23,8 +23,12 @@ import java.io.FilterOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -48,6 +52,14 @@ public class ZipWriter implements Closeable {
 
   public ZipWriter(OutputStream out) {
     zout = new ZipOutputStream(Objects.requireNonNull(out));
+  }
+
+  public static ZipWriter lockedZipWriter(File f) throws IOException {
+    try (FileChannel ch = FileChannel.open(f.toPath(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
+      try (FileLock lock = ch.lock()) {
+        return new ZipWriter(new BufferedOutputStream(Channels.newOutputStream(ch)));
+      }
+    }
   }
 
   public void write(File src, String dst) throws IOException {
