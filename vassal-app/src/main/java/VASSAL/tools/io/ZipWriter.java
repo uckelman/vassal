@@ -55,7 +55,7 @@ public class ZipWriter implements Closeable {
   }
 
   public static ZipWriter lockedZipWriter(File f) throws IOException {
-    try (FileChannel ch = FileChannel.open(f.toPath(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
+    try (FileChannel ch = FileChannel.open(f.toPath(), StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
       try (FileLock lock = ch.lock()) {
         return new ZipWriter(new BufferedOutputStream(Channels.newOutputStream(ch)));
       }

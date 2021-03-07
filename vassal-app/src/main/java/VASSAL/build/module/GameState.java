@@ -860,7 +860,7 @@ public class GameState implements CommandEncoder {
 
     final String save = saveString();
 
-    try (ZipWriter zw = new ZipWriter(f)) {
+    try (ZipWriter zw = ZipWriter.lockedZipWriter(f)) {
       try (OutputStream out = new ObfuscatingOutputStream(new BufferedOutputStream(zw.write(SAVEFILE_ZIP_ENTRY)))) {
         out.write(save.getBytes(StandardCharsets.UTF_8));
       }
