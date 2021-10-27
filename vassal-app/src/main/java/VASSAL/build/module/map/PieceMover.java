@@ -92,6 +92,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1686,10 +1687,17 @@ public class PieceMover extends AbstractBuildable
             owner = (String)piece.getProperty(Properties.OBSCURED_BY);
             piece.setProperty(Properties.OBSCURED_BY, ((Deck) piece.getParent()).isFaceDown() ? Deck.NO_USER : null);
           }
+
+          final AffineTransform t = AffineTransform.getScaleInstance(zoom, zoom);
+          t.translate(x / zoom, y / zoom);
+          g.setClip(t.createTransformedShape(piece.getShape()));
+
           piece.draw(g, x, y, map == null ? target : map.getView(), zoom);
           if (piece.getParent() instanceof Deck) {
             piece.setProperty(Properties.OBSCURED_BY, owner);
           }
+
+          g.setClip(null);
 
           final Highlighter highlighter = map == null ?
             BasicPiece.getHighlighter() : map.getHighlighter();
