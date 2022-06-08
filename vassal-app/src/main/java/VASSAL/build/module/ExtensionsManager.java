@@ -159,7 +159,10 @@ public class ExtensionsManager {
     if (dir != null && dir.exists()) {
       final File[] files = dir.listFiles(filter);
       if (files == null) {
-        ReadErrorDialog.error(new IOException(), dir);
+        ReadErrorDialog.error(
+          new IOException("Failed to list files in " + dir.getAbsolutePath()),
+          dir
+        );
       }
       else {
         Arrays.sort(files);
