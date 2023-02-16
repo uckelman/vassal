@@ -396,59 +396,60 @@ public class CounterDetailViewer extends AbstractConfigurable implements Drawabl
     final double graphicsZoom = graphicsZoomLevel;
 
     if (displayableTerrain) {
-      g.setClip(dbounds.x, dbounds.y, (int) Math.ceil(showTerrainWidth * showTerrainZoom * os_scale), (int) Math.ceil(showTerrainHeight * showTerrainZoom * os_scale));
+      final Collection<Board> boards = map.getBoards();
 
-      // get map reference point
-      final Point ptMap = pieces.isEmpty() ?
-        map.componentToMap(currentMousePosition.getPoint()) :
-        pieces.get(0).getPosition();
+      if (!boards.isEmpty()) {
+        g.setClip(dbounds.x, dbounds.y, (int) Math.ceil(showTerrainWidth * showTerrainZoom * os_scale), (int) Math.ceil(showTerrainHeight * showTerrainZoom * os_scale));
 
-      // get the drawing reference point
-      final Point ptDr = map.mapToDrawing(ptMap, os_scale);
-      ptDr.x -= dbounds.width / 2;
-      ptDr.y -= dbounds.height / 2;
+        // get map reference point
+        final Point ptMap = pieces.isEmpty() ?
+          map.componentToMap(currentMousePosition.getPoint()) :
+          pieces.get(0).getPosition();
 
-      // get the rectangle of the map to draw
-      final Rectangle vrMap = new Rectangle(
-        ptMap.x - showTerrainWidth/2,
-        ptMap.y - showTerrainHeight/2,
-        showTerrainWidth,
-        showTerrainHeight
-      );
+        // get the drawing reference point
+        final Point ptDr = map.mapToDrawing(ptMap, os_scale);
+        ptDr.x -= dbounds.width / 2;
+        ptDr.y -= dbounds.height / 2;
 
-      // translate the drawing transform by the difference between the
-      // drawing bounds and the drawing reference point
-      final AffineTransform orig_t = g2d.getTransform();
-      final AffineTransform at = new AffineTransform(orig_t);
-      at.translate(dbounds.x - ptDr.x, dbounds.y - ptDr.y);
-      g2d.setTransform(at);
+        // get the rectangle of the map to draw
+        final Rectangle vrMap = new Rectangle(
+          ptMap.x - showTerrainWidth/2,
+          ptMap.y - showTerrainHeight/2,
+          showTerrainWidth,
+          showTerrainHeight
+        );
 
-      // draw the map
-      double dzoom = showTerrainZoom * os_scale;
-      Rectangle rect = null;
-      for (final Board b: map.getBoards()) {
-        if (rect == null) {
-          final double mag = b.getMagnification();
-          dzoom /= mag;
+        // translate the drawing transform by the difference between the
+        // drawing bounds and the drawing reference point
+        final AffineTransform orig_t = g2d.getTransform();
+        final AffineTransform at = new AffineTransform(orig_t);
+        at.translate(dbounds.x - ptDr.x, dbounds.y - ptDr.y);
+        g2d.setTransform(at);
 
-          rect = new Rectangle(
-            (int)(vrMap.x * showTerrainZoom * os_scale / mag),
-            (int)(vrMap.y * showTerrainZoom * os_scale  / mag),
-            (int)(vrMap.width * showTerrainZoom * os_scale  / mag),
-            (int)(vrMap.height * showTerrainZoom * os_scale / mag)
-          );
+        // draw the map
 
-          g2d.translate(ptDr.x - rect.x, ptDr.y - rect.y);
+        final double mag = boards.iterator().next().getMagnification();
+        final double dzoom = showTerrainZoom * os_scale / mag;
+        final Rectangle rect = new Rectangle(
+          (int)(vrMap.x * showTerrainZoom * os_scale / mag),
+          (int)(vrMap.y * showTerrainZoom * os_scale  / mag),
+          (int)(vrMap.width * showTerrainZoom * os_scale  / mag),
+          (int)(vrMap.height * showTerrainZoom * os_scale / mag)
+        );
+
+        g2d.translate(ptDr.x - rect.x, ptDr.y - rect.y);
+
+        for (final Board b: boards) {
+          b.drawRegion(g2d, map.getLocation(b, dzoom), rect, dzoom, null);
         }
-        b.drawRegion(g2d, map.getLocation(b, dzoom), rect, dzoom, null);
-      }
 
-      if (isStopAfterShowing()) {
-        map.setAnyMouseoverDrawn(true);
-      }
+        if (isStopAfterShowing()) {
+          map.setAnyMouseoverDrawn(true);
+        }
 
-      g2d.setTransform(orig_t);
-      g2d.setClip(oldClip);
+        g2d.setTransform(orig_t);
+        g2d.setClip(oldClip);
+      }
 
       if (textVisible && showTerrainText.getFormat().length() > 0) {
         final Point mapPt = map.componentToMap(currentMousePosition.getPoint());
@@ -468,7 +469,7 @@ public class CounterDetailViewer extends AbstractConfigurable implements Drawabl
         if (text.length() > 0) {
           // If we're doing the "stretch the bottom all the way across" thing, then draw our "master box" now.
           if (combineCounterSummary && stretchWidthSummary) {
-            drawLabel(g, new Point(lastPieceBounds.x - 1, y), (pieces.size() == 0) ? text : " ", LabelUtils.CENTER, LabelUtils.CENTER,
+            drawLabel(g, new Point(lastPieceBounds.x - 1, y), pieces.isEmpty() ? text : " ", LabelUtils.CENTER, LabelUtils.CENTER,
               lastPieceBounds.width + 2,
               lastPieceBounds.width + 2,
               1,
