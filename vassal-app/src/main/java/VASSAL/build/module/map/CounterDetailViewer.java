@@ -406,11 +406,6 @@ public class CounterDetailViewer extends AbstractConfigurable implements Drawabl
           map.componentToMap(currentMousePosition.getPoint()) :
           pieces.get(0).getPosition();
 
-        // get the drawing reference point
-        final Point ptDr = map.mapToDrawing(ptMap, os_scale);
-        ptDr.x -= dbounds.width / 2;
-        ptDr.y -= dbounds.height / 2;
-
         // get the rectangle of the map to draw
         final Rectangle vrMap = new Rectangle(
           ptMap.x - showTerrainWidth/2,
@@ -419,28 +414,27 @@ public class CounterDetailViewer extends AbstractConfigurable implements Drawabl
           showTerrainHeight
         );
 
-        // translate the drawing transform by the difference between the
-        // drawing bounds and the drawing reference point
-        final AffineTransform orig_t = g2d.getTransform();
-        final AffineTransform at = new AffineTransform(orig_t);
-        at.translate(dbounds.x - ptDr.x, dbounds.y - ptDr.y);
-        g2d.setTransform(at);
-
-        // draw the map
-
         final double mag = boards.iterator().next().getMagnification();
         final double dzoom = showTerrainZoom * os_scale / mag;
-        final Rectangle rect = new Rectangle(
+
+        final Rectangle drect = new Rectangle(
           (int)(vrMap.x * showTerrainZoom * os_scale / mag),
           (int)(vrMap.y * showTerrainZoom * os_scale  / mag),
           (int)(vrMap.width * showTerrainZoom * os_scale  / mag),
           (int)(vrMap.height * showTerrainZoom * os_scale / mag)
         );
 
-        g2d.translate(ptDr.x - rect.x, ptDr.y - rect.y);
+        // translate the drawing transform
+        final AffineTransform orig_t = g2d.getTransform();
 
+        final AffineTransform at = new AffineTransform(orig_t);
+        at.translate(dbounds.x - drect.x, dbounds.y - drect.y);
+
+        g2d.setTransform(at);
+
+        // draw the terrain
         for (final Board b: boards) {
-          b.drawRegion(g2d, map.getLocation(b, dzoom), rect, dzoom, null);
+          b.drawRegion(g2d, map.getLocation(b, dzoom), drect, dzoom, null);
         }
 
         if (isStopAfterShowing()) {
