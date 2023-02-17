@@ -399,8 +399,6 @@ public class CounterDetailViewer extends AbstractConfigurable implements Drawabl
       final Collection<Board> boards = map.getBoards();
 
       if (!boards.isEmpty()) {
-        g.setClip(dbounds.x, dbounds.y, (int) Math.ceil(showTerrainWidth * showTerrainZoom * os_scale), (int) Math.ceil(showTerrainHeight * showTerrainZoom * os_scale));
-
         // get map reference point
         final Point ptMap = pieces.isEmpty() ?
           map.componentToMap(currentMousePosition.getPoint()) :
@@ -419,9 +417,17 @@ public class CounterDetailViewer extends AbstractConfigurable implements Drawabl
 
         final Rectangle drect = new Rectangle(
           (int)(vrMap.x * showTerrainZoom * os_scale / mag),
-          (int)(vrMap.y * showTerrainZoom * os_scale  / mag),
-          (int)(vrMap.width * showTerrainZoom * os_scale  / mag),
+          (int)(vrMap.y * showTerrainZoom * os_scale / mag),
+          (int)(vrMap.width * showTerrainZoom * os_scale / mag),
           (int)(vrMap.height * showTerrainZoom * os_scale / mag)
+        );
+
+        // restrict drawing to the area we want to draw on
+        g2d.setClip(
+          dbounds.x,
+          dbounds.y,
+          (int) Math.ceil(showTerrainWidth * showTerrainZoom * os_scale),
+          (int) Math.ceil(showTerrainHeight * showTerrainZoom * os_scale)
         );
 
         // translate the drawing transform
