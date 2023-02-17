@@ -426,6 +426,7 @@ public class CounterDetailViewer extends AbstractConfigurable implements Drawabl
         g2d.setClip(
           dbounds.x,
           dbounds.y,
+//          dbounds.y + (dbounds.height - drect.height) / 2,
           (int) Math.ceil(showTerrainWidth * showTerrainZoom * os_scale),
           (int) Math.ceil(showTerrainHeight * showTerrainZoom * os_scale)
         );
