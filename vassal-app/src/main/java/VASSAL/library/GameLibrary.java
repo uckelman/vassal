@@ -17,8 +17,6 @@
 package VASSAL.library;
 
 import java.io.File;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -32,7 +30,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.DigestInputStream;
+import java.security.DigestOutputStream;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.util.Comparator;
@@ -55,9 +53,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 // import org.apache.commons.lang3.time.StopWatch;
 
@@ -162,40 +161,39 @@ public class GameLibrary {
   protected static String formatDate(Date d) throws ParseException {
     return (new SimpleDateFormat(DATE_FORMAT)).format(d); 
   }
-  
-    
+
   /**
    * Do a GET request
    *
    * @param url Query
    * @param accept Mime-type to accept
-   * @return Stream to read response from 
+   * @param handler Response handler
+   * @return Result returned from handler
    */
-  protected InputStream getRequest(URL url, String accept)
+  protected static <T> T getRequest(URL url, String accept, HttpClientResponseHandler<T> handler)
     throws IOException, URISyntaxException {
-    
-    final HttpGet               get      = new HttpGet(url.toURI());
-    get.setHeader(HttpHeaders.USER_AGENT, "VASSAL"); //NON-NLS
-    if (accept != null && !accept.isBlank()) 
-      get.setHeader(HttpHeaders.ACCEPT, accept);
 
-    try (
-         CloseableHttpClient   client   = HttpClients.createDefault();
-         CloseableHttpResponse response = client.execute(get)) {
-      final int code = response.getCode();
+    final HttpGet get = new HttpGet(url.toURI());
+    get.setHeader(HttpHeaders.USER_AGENT, "VASSAL");
+    if (accept != null && !accept.isBlank()) {
+      get.setHeader(HttpHeaders.ACCEPT, accept);
+    }
+
+    try (CloseableHttpClient client = HttpClients.createDefault()) {
+      return client.execute(get, response -> {
+        final int code = response.getCode();
       
-      if (code == 404) {
-        throw new IOException(Resources.getString("LibraryBrowser.404", url)); //NON-NLS
-      }
+        if (code == 404) {
+          throw new IOException(Resources.getString("LibraryBrowser.404", url)); //NON-NLS
+        }
       
-      if (code / 100 != 2)  {
-        throw new IOException(Resources.getString("LibraryBrowser.bad_code",
-                                                  url, code)); //NON-NLS
-      }
-      final InputStream           content = response.getEntity().getContent();
-      final ByteArrayOutputStream obytes  = new ByteArrayOutputStream();
-      content.transferTo(obytes);
-      return new ByteArrayInputStream(obytes.toByteArray());       
+        if (code / 100 != 2)  {
+          throw new IOException(Resources.getString("LibraryBrowser.bad_code",
+                                                    url, code)); //NON-NLS
+        }
+
+        return handler.handleResponse(response);
+      });
     }
   }
 
@@ -205,11 +203,9 @@ public class GameLibrary {
    * @param url Query URL
    * @return JSON as a string
    */
-  protected String getJSON(URL url)  throws IOException, URISyntaxException {
-    try (InputStream input = getRequest(url, "application/json")) {
-      return new String(input.readAllBytes(), //NON-NLS
-                        StandardCharsets.UTF_8);
-    }
+  protected static String getJSON(URL url)  throws IOException, URISyntaxException {
+    return getRequest(url, "application/json", response -> EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8)
+    );
   }
 
   /**
@@ -223,36 +219,43 @@ public class GameLibrary {
    * @param sha256 Check-sum to compare against
    * @param size Expected size of file
    */
-  protected void getFile(URL url, File outname, String sha256, long size)
+  protected static void getFile(URL url, File outname, String sha256, long size)
     throws IOException, URISyntaxException {
-    MessageDigest digest = null;
-    try {
-      digest = MessageDigest.getInstance("SHA-256"); //NON-NLS
-    }
-    catch (NoSuchAlgorithmException e) {
-      throw new IOException(Resources.getString("LibraryBrowser.missing_sha256_algorithm"));
-    }
-    if (sha256 == null || sha256.isBlank())
-      throw new IOException(Resources.getString("LibraryBrowser.missing_sha256")); //NON-NLS
 
-    try (InputStream in = new DigestInputStream(getRequest(url, null),
-                                                digest);
-         OutputStream out  = Files.newOutputStream(outname.toPath())) {
-      final long read = in.transferTo(out);
-      
-      if (read != size)  {
-        throw new IOException(Resources.getString("LibraryBrowser.inconsistent_read", //NON-NLS
-                                                    read, size));
+    if (sha256 == null || sha256.isBlank()) {
+      throw new IOException(Resources.getString("LibraryBrowser.missing_sha256"));
+    }
+
+    final Path outpath = outname.toPath();
+
+    final MessageDigest digest = getRequest(url, null, response -> {
+      MessageDigest md = null;
+      try {
+        md = MessageDigest.getInstance("SHA-256");
       }
+      catch (NoSuchAlgorithmException e) {
+        throw new IOException(Resources.getString("LibraryBrowser.missing_sha256_algorithm"));
+      }
+
+      try (OutputStream fout = Files.newOutputStream(outpath);
+           OutputStream dout = new DigestOutputStream(fout, md)) {
+        response.getEntity().writeTo(dout);
+      }
+
+      return md;
+    });
+
+    final long read = Files.size(outpath);
+
+    if (read != size) {
+      throw new IOException(Resources.getString("LibraryBrowser.inconsistent_read", read, size));
     }
       
     // Check sha-256 against message digest
     final byte[] expect = HexFormat.of().parseHex(sha256);
-    final byte[] got    = digest.digest();
-    if (!MessageDigest.isEqual(expect, got)) {
-      throw new IOException(Resources.getString("LibraryBrowser.inconsistent_checksum", //NON-NLS
-                                                sha256,
-                                                HexFormat.of().formatHex(got)));
+    final byte[] actual = digest.digest();
+    if (!MessageDigest.isEqual(expect, actual)) {
+      throw new IOException(Resources.getString("LibraryBrowser.inconsistent_checksum", sha256, HexFormat.of().formatHex(actual)));
     }
   }
 
